@@ -6,3 +6,12 @@ export interface Tema {
     notas?: string;
     ultimoEstudio?: Date;
 }
+export interface Ajustes {
+    id?: number;
+    numTemas: number;
+    fechaExamen: string;
+    diasEstudioSemana: number;
+    frecuenciaCasosPracticos: number; // Cada cuántos días
+    horaRecordatorio: string; // Ej: "09:00"
+    diasParaRojo: number; // Por defecto lo pondremos a 90
+}

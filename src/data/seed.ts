@@ -12,11 +12,12 @@ export async function sembrarDatos() {
             numero: i + 1,
             titulo: `Tema ${i + 1}`,
             notas: '',
-            ultimoEstudio:
-                i < diasDesdeEstudio.length ? ahora - diasDesdeEstudio[i] * DIA : null,
+            ultimoEstudio: i < diasDesdeEstudio.length ? ahora - diasDesdeEstudio[i] * DIA : null,
         }))
     )
 
+    // 👇 COMENTAMOS ESTO PARA QUE SALTE EL ONBOARDING
+    /*
     await db.ajustes.put({
         id: 1,
         fechaExamen: ahora + 84 * DIA,
@@ -25,4 +26,5 @@ export async function sembrarDatos() {
         horaRecordatorio: '18:00',
         diasParaRojo: 90,
     })
+    */
 }
