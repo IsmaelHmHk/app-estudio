@@ -1,0 +1,48 @@
+body { margin: 0; font-family: system-ui, sans-serif; background: #f5f5f4; color: #222; }
+#root { max-width: 420px; margin: 0 auto; padding: 16px; }
+.tarjeta { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.tarjeta h2, .tarjeta h3 { margin: 4px 0 10px; }
+
+/* Contenedor principal con margen inferior para que el navbar no tape el contenido */
+.app-container {
+  padding-bottom: 70px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Navbar fijo en la parte inferior */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: #1e1e1e;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-top: 1px solid #333;
+  z-index: 1000;
+}
+
+.nav-item {
+  background: none;
+  border: none;
+  color: #888;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.nav-item.active {
+  color: #4caf50; /* O el color principal de tu app */
+  font-weight: bold;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
