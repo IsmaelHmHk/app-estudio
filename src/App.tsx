@@ -1,55 +1,105 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './data/db';
-import type { Tab } from './types';
-import { Navbar } from './ui/Navbar';
 import { Inicio } from './ui/Inicio';
-import { Temas } from './ui/Temas';
+import { ListaTemas } from './ui/ListaTemas';
 import { DetalleTema } from './ui/DetalleTema';
-import { Onboarding } from './ui/Onboarding'; // ¡Importante importar el nuevo componente!
+import { Stats } from './ui/Stats';
 import { Ajustes } from './ui/Ajustes';
+import { Onboarding } from './ui/Onboarding';
 
-export function App() {
-    const [activeTab, setActiveTab] = useState<Tab>('inicio');
+export const App = () => {
+    const [tabActual, setTabActual] = useState<'inicio' | 'temas' | 'stats' | 'ajustes'>('inicio');
     const [temaSeleccionadoId, setTemaSeleccionadoId] = useState<number | null>(null);
 
-    // Leemos TODA la tabla de ajustes para ver si está vacía
-    const ajustesData = useLiveQuery(() => db.ajustes.toArray());
+    const ajustes = useLiveQuery(() => db.ajustes.get(1));
 
-    // Si ajustesData es undefined, Dexie todavía está cargando la base de datos
-    if (ajustesData === undefined) {
-        return <div style={{ padding: '20px', color: '#aaa' }}>Cargando aplicación...</div>;
-    }
+    if (ajustes === undefined) return <div style={{ color: '#fff', padding: '20px' }}>Cargando...</div>;
+    if (!ajustes) return <Onboarding />;
 
-    // Si devuelve un array vacío, es la primera vez que entra: mostramos el Onboarding
-    if (ajustesData.length === 0) {
-        return <div className="app-container"><Onboarding /></div>;
-    }
+    const abrirDetalleTema = (id: number) => {
+        setTemaSeleccionadoId(id);
+        setTabActual('temas');
+    };
 
-    // Si pasa de aquí, es que ya hay ajustes. Renderizamos la app normal.
     return (
-        <div className="app-container">
-            <main className="content">
-                {activeTab === 'inicio' && <Inicio onSelectTema={setTemaSeleccionadoId} />}
-
-                {activeTab === 'temas' && (
-                    temaSeleccionadoId !== null
-                        ? <DetalleTema temaId={temaSeleccionadoId} onVolver={() => setTemaSeleccionadoId(null)} />
-                        : <Temas onSelectTema={setTemaSeleccionadoId} />
+        <div style={{ backgroundColor: '#121212', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
+            {/* Contenido Principal */}
+            <main style={{ paddingBottom: '70px' }}>
+                {tabActual === 'inicio' && (
+                    <Inicio onAbrirTema={(id) => abrirDetalleTema(id)} />
                 )}
 
-                {activeTab === 'stats' && <div>Pantalla Stats</div>}
-                {activeTab === 'sugerencias' && <div>Pantalla Sugerencias</div>}
-                {activeTab === 'ajustes' && <div>Pantalla Ajustes</div>}
-                {activeTab === 'ajustes' && <Ajustes />}
+                {tabActual === 'temas' && (
+                    temaSeleccionadoId ? (
+                        <DetalleTema
+                            temaId={temaSeleccionadoId}
+                            onVolver={() => setTemaSeleccionadoId(null)}
+                        />
+                    ) : (
+                        <ListaTemas onSeleccionarTema={(id) => setTemaSeleccionadoId(id)} />
+                    )
+                )}
+
+                {tabActual === 'stats' && <Stats />}
+                {tabActual === 'ajustes' && <Ajustes />}
             </main>
 
-            {/* Ocultamos el navbar al entrar en el detalle para limpiar la pantalla */}
-            {temaSeleccionadoId === null && (
-                <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
-            )}
+            {/* Navegación Inferior */}
+            <nav style={navStyle}>
+                <button
+                    onClick={() => { setTabActual('inicio'); setTemaSeleccionadoId(null); }}
+                    style={tabActual === 'inicio' ? navBtnActiveStyle : navBtnStyle}
+                >
+                    🏠 Inicio
+                </button>
+                <button
+                    onClick={() => { setTabActual('temas'); setTemaSeleccionadoId(null); }}
+                    style={tabActual === 'temas' ? navBtnActiveStyle : navBtnStyle}
+                >
+                    📚 Temas
+                </button>
+                <button
+                    onClick={() => { setTabActual('stats'); setTemaSeleccionadoId(null); }}
+                    style={tabActual === 'stats' ? navBtnActiveStyle : navBtnStyle}
+                >
+                    📊 Stats
+                </button>
+                <button
+                    onClick={() => { setTabActual('ajustes'); setTemaSeleccionadoId(null); }}
+                    style={tabActual === 'ajustes' ? navBtnActiveStyle : navBtnStyle}
+                >
+                    ⚙️ Ajustes
+                </button>
+            </nav>
         </div>
     );
-}
+};
 
-export default App;
+const navStyle = {
+    position: 'fixed' as const,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '60px',
+    backgroundColor: '#1e1e1e',
+    borderTop: '1px solid #333',
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    zIndex: 1000
+};
+
+const navBtnStyle = {
+    background: 'none',
+    border: 'none',
+    color: '#888',
+    fontSize: '0.85rem',
+    fontWeight: 'bold' as const,
+    cursor: 'pointer'
+};
+
+const navBtnActiveStyle = {
+    ...navBtnStyle,
+    color: '#ff9800'
+};

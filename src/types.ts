@@ -5,6 +5,7 @@ export interface Tema {
     titulo: string;
     notas?: string;
     ultimoEstudio?: Date;
+    esFavorito?: boolean;
 }
 export interface Ajustes {
     id?: number;

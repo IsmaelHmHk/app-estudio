@@ -113,6 +113,9 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#888' }}>
                                     <span>Último: {t.ultimoEstudio ? new Date(t.ultimoEstudio).toLocaleDateString() : 'Sin datos'}</span>
                                     <span>Límite rojo: {maxDias} días</span>
+                                    <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>
+                                    {t.esFavorito ? '⭐ ' : ''}{t.titulo}
+                                </span>
                                 </div>
                             </div>
                         </div>

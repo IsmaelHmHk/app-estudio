@@ -6,6 +6,7 @@ export interface Tema {
     titulo: string
     notas: string
     ultimoEstudio: number | null // null = gris (sin empezar)
+    esFavorito?: boolean;
 }
 
 export interface Sesion {
