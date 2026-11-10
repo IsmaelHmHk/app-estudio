@@ -11,8 +11,8 @@ export const Ajustes: React.FC = () => {
     const [diasParaRojo, setDiasParaRojo] = useState(14);
     const [fechaExamen, setFechaExamen] = useState('');
     const [horasObjetivo, setHorasObjetivo] = useState(3);
-    const [horaNotificacion, setHoraNotificacion] = useState('09:00');
-    const [estadoNotificacion, setEstadoNotificacion] = useState<NotificationPermission>('default');
+    const [frecuenciaPracticos, setFrecuenciaPracticos] = useState(7);
+    const [diasSemana, setDiasSemana] = useState(5);
     const [mensaje, setMensaje] = useState('');
 
     useEffect(() => {
@@ -22,28 +22,11 @@ export const Ajustes: React.FC = () => {
                 const f = new Date(ajustes.fechaExamen);
                 setFechaExamen(f.toISOString().split('T')[0]);
             }
-            setHorasObjetivo((ajustes as any).horasObjetivo || 3);
-            setHoraNotificacion((ajustes as any).horaNotificacion || '09:00');
-        }
-        if ('Notification' in window) {
-            setEstadoNotificacion(Notification.permission);
+            setHorasObjetivo(ajustes.horasObjetivo || 3);
+            setFrecuenciaPracticos(ajustes.frecuenciaPracticos || 7);
+            setDiasSemana(ajustes.diasSemana || 5);
         }
     }, [ajustes]);
-
-    const activarNotificaciones = async () => {
-        if (!('Notification' in window)) {
-            alert('Tu navegador no admite notificaciones locales.');
-            return;
-        }
-        const permiso = await Notification.requestPermission();
-        setEstadoNotificacion(permiso);
-        if (permiso === 'granted') {
-            new Notification('OpoPlan', {
-                body: 'Notificaciones activadas. Te avisaremos cuando sea la hora de estudio.',
-                icon: '/pwa-192x192.png'
-            });
-        }
-    };
 
     const handleGuardar = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +36,8 @@ export const Ajustes: React.FC = () => {
             diasParaRojo: Number(diasParaRojo),
             fechaExamen: fechaExamen ? new Date(fechaExamen).getTime() : new Date().getTime(),
             horasObjetivo: Number(horasObjetivo),
-            horaNotificacion
+            frecuenciaPracticos: Number(frecuenciaPracticos),
+            diasSemana: Number(diasSemana)
         } as any);
 
         setMensaje('Configuración actualizada correctamente.');
@@ -61,20 +45,45 @@ export const Ajustes: React.FC = () => {
     };
 
     if (!ajustes) {
-        return <div style={{ padding: '20px', color: '#eaeef0' }}>Cargando ajustes...</div>;
+        return <div style={{ padding: '20px', color: '#EAEFEF' }}>Cargando ajustes...</div>;
     }
 
     return (
-        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '90px', color: '#eaeef0' }}>
-            <h2 style={{ margin: 0, fontSize: '1.3rem', color: '#f0b6c5', fontWeight: 600 }}>Configuración de la Oposición</h2>
+        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '90px', color: '#EAEFEF' }}>
+            <h2 style={{ margin: 0, fontSize: '1.3rem', color: '#F0B6C5', fontWeight: 600 }}>Configuración de la Oposición</h2>
 
             {mensaje && (
-                <div style={{ padding: '12px', backgroundColor: '#2d5a52', color: '#e0f2ef', borderRadius: '8px', fontSize: '0.85rem' }}>
+                <div style={{ padding: '12px', backgroundColor: '#2D5A52', color: '#E0F2EF', borderRadius: '8px', fontSize: '0.85rem' }}>
                     {mensaje}
                 </div>
             )}
 
             <form onSubmit={handleGuardar} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={cardStyle}>
+                    <label style={labelStyle}>Frecuencia de Casos Prácticos (Días)</label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={frecuenciaPracticos}
+                        onChange={(e) => setFrecuenciaPracticos(Number(e.target.value))}
+                        style={inputStyle}
+                    />
+                    <span style={hintStyle}>Intervalo de días programado para la realización de supuestos prácticos.</span>
+                </div>
+
+                <div style={cardStyle}>
+                    <label style={labelStyle}>Días de estudio a la semana</label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="7"
+                        value={diasSemana}
+                        onChange={(e) => setDiasSemana(Number(e.target.value))}
+                        style={inputStyle}
+                    />
+                </div>
+
                 <div style={cardStyle}>
                     <label style={labelStyle}>Límite de días para aviso de repaso</label>
                     <input
@@ -85,7 +94,6 @@ export const Ajustes: React.FC = () => {
                         onChange={(e) => setDiasParaRojo(Number(e.target.value))}
                         style={inputStyle}
                     />
-                    <span style={hintStyle}>Número de días para que un tema pase a la categoría "Repasado hace tiempo".</span>
                 </div>
 
                 <div style={cardStyle}>
@@ -96,61 +104,14 @@ export const Ajustes: React.FC = () => {
                         onChange={(e) => setFechaExamen(e.target.value)}
                         style={inputStyle}
                     />
-                    <span style={hintStyle}>Se utiliza para calcular la cuenta atrás en Estadísticas.</span>
-                </div>
-
-                <div style={cardStyle}>
-                    <label style={labelStyle}>Objetivo diario de estudio (Horas)</label>
-                    <input
-                        type="number"
-                        min="1"
-                        max="12"
-                        value={horasObjetivo}
-                        onChange={(e) => setHorasObjetivo(Number(e.target.value))}
-                        style={inputStyle}
-                    />
-                    <span style={hintStyle}>Meta recomendada para el seguimiento de racha y estadísticas.</span>
-                </div>
-
-                <div style={cardStyle}>
-                    <label style={labelStyle}>Recordatorio diario de estudio</label>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <input
-                            type="time"
-                            value={horaNotificacion}
-                            onChange={(e) => setHoraNotificacion(e.target.value)}
-                            style={{ ...inputStyle, flex: 1 }}
-                        />
-                        <button
-                            type="button"
-                            onClick={activarNotificaciones}
-                            style={{
-                                padding: '10px 14px',
-                                backgroundColor: estadoNotificacion === 'granted' ? '#2d5a52' : '#2a3c42',
-                                color: estadoNotificacion === 'granted' ? '#e0f2ef' : '#f0b6c5',
-                                border: '1px solid #3b9a9c',
-                                borderRadius: '6px',
-                                fontWeight: 'bold',
-                                fontSize: '0.8rem',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {estadoNotificacion === 'granted' ? 'Permiso Concedido' : 'Activar Notificaciones'}
-                        </button>
-                    </div>
-                    <span style={hintStyle}>
-                        {estadoNotificacion === 'granted'
-                            ? `Aviso diario programado a las ${horaNotificacion}.`
-                            : 'Pulsa activar para recibir avisos directos en este dispositivo.'}
-                    </span>
                 </div>
 
                 <button
                     type="submit"
                     style={{
                         padding: '14px',
-                        backgroundColor: '#f0b6c5',
-                        color: '#111a1e',
+                        backgroundColor: '#F0B6C5',
+                        color: '#111A1E',
                         border: 'none',
                         borderRadius: '8px',
                         fontWeight: 'bold',
@@ -170,28 +131,28 @@ const cardStyle = {
     display: 'flex',
     flexDirection: 'column' as const,
     gap: '8px',
-    backgroundColor: '#1a272c',
+    backgroundColor: '#1A272C',
     padding: '16px',
     borderRadius: '10px',
-    border: '1px solid #2d3e46'
+    border: '1px solid #2D3E46'
 };
 
 const labelStyle = {
     fontWeight: 600 as const,
     fontSize: '0.9rem',
-    color: '#3b9a9c'
+    color: '#3B9A9C'
 };
 
 const inputStyle = {
     padding: '10px 12px',
     borderRadius: '6px',
-    backgroundColor: '#111a1e',
-    border: '1px solid #2d3e46',
-    color: '#eaeef0',
+    backgroundColor: '#111A1E',
+    border: '1px solid #2D3E46',
+    color: '#EAEFEF',
     fontSize: '0.95rem'
 };
 
 const hintStyle = {
     fontSize: '0.75rem',
-    color: '#8b9da5'
+    color: '#8B9DA5'
 };

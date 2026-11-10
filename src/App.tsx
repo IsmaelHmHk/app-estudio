@@ -4,47 +4,26 @@ import { db } from './data/db';
 import { Inicio } from './ui/Inicio';
 import { ListaTemas } from './ui/ListaTemas';
 import { DetalleTema } from './ui/DetalleTema';
+import { Practico } from './ui/Practico';
 import { Stats } from './ui/Stats';
 import { Ajustes } from './ui/Ajustes';
 import { Onboarding } from './ui/Onboarding';
 
 export const App = () => {
-    const [tabActual, setTabActual] = useState<'inicio' | 'temas' | 'stats' | 'ajustes'>('inicio');
+    const [tabActual, setTabActual] = useState<'inicio' | 'temas' | 'practico' | 'stats' | 'ajustes'>('inicio');
     const [temaSeleccionadoId, setTemaSeleccionadoId] = useState<number | null>(null);
 
-    // Consulta segura: obtiene el primer registro de ajustes sin forzar ID fijo
     const ajustes = useLiveQuery(async () => {
         try {
             const list = await db.ajustes.toArray();
             return list.length > 0 ? list[0] : null;
         } catch (error) {
-            console.error("Error al acceder a IndexedDB:", error);
             return null;
         }
     });
 
-    // Mientras IndexedDB responde
-    if (ajustes === undefined) {
-        return (
-            <div style={{
-                backgroundColor: '#111A1E',
-                minHeight: '100vh',
-                color: '#EAEFEF',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'system-ui, sans-serif'
-            }}>
-                <div>Cargando OpoPlan...</div>
-            </div>
-        );
-    }
-
-    // Si no existen ajustes todavia, redirige al Onboarding
-    if (!ajustes) {
-        return <Onboarding />;
-    }
+    if (ajustes === undefined) return <div style={{ color: '#EAEFEF', padding: '20px' }}>Cargando OpoPlan...</div>;
+    if (!ajustes) return <Onboarding />;
 
     const abrirDetalleTema = (id: number) => {
         setTemaSeleccionadoId(id);
@@ -53,28 +32,20 @@ export const App = () => {
 
     return (
         <div style={{ backgroundColor: '#111A1E', minHeight: '100vh', color: '#EAEFEF', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-            {/* Contenido Principal */}
             <main style={{ paddingBottom: '70px' }}>
-                {tabActual === 'inicio' && (
-                    <Inicio onAbrirTema={(id) => abrirDetalleTema(id)} />
-                )}
-
+                {tabActual === 'inicio' && <Inicio onAbrirTema={(id) => abrirDetalleTema(id)} />}
                 {tabActual === 'temas' && (
                     temaSeleccionadoId ? (
-                        <DetalleTema
-                            temaId={temaSeleccionadoId}
-                            onVolver={() => setTemaSeleccionadoId(null)}
-                        />
+                        <DetalleTema temaId={temaSeleccionadoId} onVolver={() => setTemaSeleccionadoId(null)} />
                     ) : (
                         <ListaTemas onSeleccionarTema={(id) => setTemaSeleccionadoId(id)} />
                     )
                 )}
-
+                {tabActual === 'practico' && <Practico />}
                 {tabActual === 'stats' && <Stats />}
                 {tabActual === 'ajustes' && <Ajustes />}
             </main>
 
-            {/* Navegación Inferior */}
             <nav style={navStyle}>
                 <button
                     onClick={() => { setTabActual('inicio'); setTemaSeleccionadoId(null); }}
@@ -87,6 +58,12 @@ export const App = () => {
                     style={tabActual === 'temas' ? navBtnActiveStyle : navBtnStyle}
                 >
                     Temas
+                </button>
+                <button
+                    onClick={() => { setTabActual('practico'); setTemaSeleccionadoId(null); }}
+                    style={tabActual === 'practico' ? navBtnActiveStyle : navBtnStyle}
+                >
+                    Práctico
                 </button>
                 <button
                     onClick={() => { setTabActual('stats'); setTemaSeleccionadoId(null); }}

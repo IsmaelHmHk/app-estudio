@@ -5,15 +5,19 @@ export const Onboarding: React.FC = () => {
     const [totalTemas, setTotalTemas] = useState(25);
     const [fechaExamen, setFechaExamen] = useState('');
     const [diasSemana, setDiasSemana] = useState(5);
+    const [frecuenciaPracticos, setFrecuenciaPracticos] = useState(7);
 
     const handleComenzar = async (e: React.FormEvent) => {
         e.preventDefault();
 
         await db.ajustes.put({
             id: 1,
+            totalTemas: Number(totalTemas),
+            fechaExamen: fechaExamen ? new Date(fechaExamen).getTime() : new Date().getTime(),
+            diasSemana: Number(diasSemana),
+            frecuenciaPracticos: Number(frecuenciaPracticos),
             diasParaRojo: 14,
-            horasObjetivo: 3,
-            fechaExamen: fechaExamen ? new Date(fechaExamen).getTime() : new Date().getTime()
+            horasObjetivo: 3
         } as any);
 
         const count = Math.max(1, Number(totalTemas) || 10);
@@ -53,23 +57,23 @@ export const Onboarding: React.FC = () => {
                     borderRadius: '12px',
                     border: '1px solid #2D3E46',
                     width: '100%',
-                    maxWidth: '400px',
+                    maxWidth: '420px',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '18px'
+                    gap: '16px'
                 }}
             >
                 <div>
                     <h1 style={{ margin: '0 0 6px 0', fontSize: '1.4rem', color: '#F0B6C5', textAlign: 'center', fontWeight: 600 }}>
-                        Bienvenido
+                        Configuración del Plan
                     </h1>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#8B9DA5', textAlign: 'center' }}>
-                        Configura tu plan de estudio inicial en un minuto.
+                        Define la estructura de tu oposición para personalizar tu agenda.
                     </p>
                 </div>
 
                 <div style={groupStyle}>
-                    <label style={labelStyle}>1. ¿Cuántos temas tiene tu oposición?</label>
+                    <label style={labelStyle}>1. ¿Cuántos temas tienes en total?</label>
                     <input
                         type="number"
                         min="1"
@@ -82,7 +86,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div style={groupStyle}>
-                    <label style={labelStyle}>2. Fecha aproximada del examen</label>
+                    <label style={labelStyle}>2. Fecha del examen (Aproximada)</label>
                     <input
                         type="date"
                         value={fechaExamen}
@@ -103,6 +107,20 @@ export const Onboarding: React.FC = () => {
                         style={inputStyle}
                         required
                     />
+                </div>
+
+                <div style={groupStyle}>
+                    <label style={labelStyle}>4. ¿Cada cuántos días harás casos prácticos?</label>
+                    <input
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={frecuenciaPracticos}
+                        onChange={(e) => setFrecuenciaPracticos(Number(e.target.value))}
+                        style={inputStyle}
+                        required
+                    />
+                    <span style={hintStyle}>Ejemplo: Cada 7 días para programar un supuesto semanal.</span>
                 </div>
 
                 <button
@@ -145,4 +163,9 @@ const inputStyle = {
     border: '1px solid #2D3E46',
     color: '#EAEFEF',
     fontSize: '0.95rem'
+};
+
+const hintStyle = {
+    fontSize: '0.75rem',
+    color: '#8B9DA5'
 };
