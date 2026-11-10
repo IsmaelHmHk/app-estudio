@@ -11,14 +11,28 @@ export const Onboarding: React.FC = () => {
     const handleGuardar = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        await db.ajustes.add({
-            numTemas,
-            fechaExamen: new Date(fechaExamen).getTime(),
-            diasEstudioSemana,
-            frecuenciaCasosPracticos: frecuenciaCasos,
-            horaRecordatorio,
-            diasParaRojo: 90
-        } as any);
+        try {
+            // Aseguramos que la fecha es válida; si falla, toma la fecha de hoy
+            const timestampExamen = fechaExamen
+                ? new Date(fechaExamen).getTime()
+                : Date.now();
+
+            // Usamos .put() con id: 1 explícito para no chocar con IndexedDB
+            await db.ajustes.put({
+                id: 1,
+                numTemas,
+                fechaExamen: isNaN(timestampExamen) ? Date.now() : timestampExamen,
+                diasEstudioSemana,
+                frecuenciaCasosPracticos: frecuenciaCasos,
+                horaRecordatorio,
+                diasParaRojo: 90
+            } as any);
+
+            // Forzamos un refresco rápido si el liveQuery tarda un instante en enterarse
+            window.location.reload();
+        } catch (error) {
+            console.error('Error al guardar ajustes:', error);
+        }
     };
 
     return (
@@ -42,7 +56,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#0034ff', fontWeight: '500' }}>2. Fecha del examen (Aproximada)</label>
+                    <label style={{ color: '#fff', fontWeight: '500' }}>2. Fecha del examen (Aproximada)</label>
                     <input
                         type="date"
                         value={fechaExamen}
@@ -53,7 +67,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#ff0000', fontWeight: '500' }}>3. ¿Cuántos días a la semana vas a estudiar?</label>
+                    <label style={{ color: '#fff', fontWeight: '500' }}>3. ¿Cuántos días a la semana vas a estudiar?</label>
                     <input
                         type="number"
                         min="1" max="7"
@@ -65,7 +79,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#ff0000', fontWeight: '500' }}>4. ¿Cada cuántos días harás casos prácticos?</label>
+                    <label style={{ color: '#fff', fontWeight: '500' }}>4. ¿Cada cuántos días harás casos prácticos?</label>
                     <input
                         type="number"
                         value={frecuenciaCasos}
@@ -76,7 +90,7 @@ export const Onboarding: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#ff0000', fontWeight: '500' }}>5. ¿A qué hora quieres que te recuerde estudiar?</label>
+                    <label style={{ color: '#fff', fontWeight: '500' }}>5. ¿A qué hora quieres que te recuerde estudiar?</label>
                     <input
                         type="time"
                         value={horaRecordatorio}
@@ -89,7 +103,7 @@ export const Onboarding: React.FC = () => {
                 <button
                     type="submit"
                     style={{
-                        marginTop: '16px', padding: '16px', backgroundColor: '#1ec3b3',
+                        marginTop: '16px', padding: '16px', backgroundColor: '#4caf50',
                         color: 'white', border: 'none', borderRadius: '8px',
                         fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer'
                     }}
@@ -104,8 +118,8 @@ export const Onboarding: React.FC = () => {
 const inputStyle = {
     padding: '12px',
     borderRadius: '8px',
-    backgroundColor: '#077876',
-    color: '#d100ff',
+    backgroundColor: '#1e1e1e',
+    color: '#fff',
     border: '1px solid #444',
     fontSize: '1rem',
     width: '100%',
