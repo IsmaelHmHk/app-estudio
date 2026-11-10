@@ -6,6 +6,7 @@ export const Onboarding: React.FC = () => {
     const [fechaExamen, setFechaExamen] = useState('');
     const [diasSemana, setDiasSemana] = useState(5);
     const [frecuenciaPracticos, setFrecuenciaPracticos] = useState(7);
+    const [horaNotificacion, setHoraNotificacion] = useState('09:00');
 
     const handleComenzar = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -16,6 +17,7 @@ export const Onboarding: React.FC = () => {
             fechaExamen: fechaExamen ? new Date(fechaExamen).getTime() : new Date().getTime(),
             diasSemana: Number(diasSemana),
             frecuenciaPracticos: Number(frecuenciaPracticos),
+            horaNotificacion,
             diasParaRojo: 14,
             horasObjetivo: 3
         } as any);
@@ -65,10 +67,10 @@ export const Onboarding: React.FC = () => {
             >
                 <div>
                     <h1 style={{ margin: '0 0 6px 0', fontSize: '1.4rem', color: '#F0B6C5', textAlign: 'center', fontWeight: 600 }}>
-                        Configuración del Plan
+                        ¡Bienvenido!
                     </h1>
                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#8B9DA5', textAlign: 'center' }}>
-                        Define la estructura de tu oposición para personalizar tu agenda.
+                        Vamos a configurar tu plan de estudio en 1 minuto.
                     </p>
                 </div>
 
@@ -120,7 +122,17 @@ export const Onboarding: React.FC = () => {
                         style={inputStyle}
                         required
                     />
-                    <span style={hintStyle}>Ejemplo: Cada 7 días para programar un supuesto semanal.</span>
+                </div>
+
+                <div style={groupStyle}>
+                    <label style={labelStyle}>5. ¿A qué hora quieres que te recuerde estudiar?</label>
+                    <input
+                        type="time"
+                        value={horaNotificacion}
+                        onChange={(e) => setHoraNotificacion(e.target.value)}
+                        style={inputStyle}
+                        required
+                    />
                 </div>
 
                 <button
@@ -163,9 +175,4 @@ const inputStyle = {
     border: '1px solid #2D3E46',
     color: '#EAEFEF',
     fontSize: '0.95rem'
-};
-
-const hintStyle = {
-    fontSize: '0.75rem',
-    color: '#8B9DA5'
 };
