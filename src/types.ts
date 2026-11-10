@@ -15,4 +15,5 @@ export interface Ajustes {
     frecuenciaCasosPracticos: number; // Cada cuántos días
     horaRecordatorio: string; // Ej: "09:00"
     diasParaRojo: number; // Por defecto lo pondremos a 90
+    minutosPomodoro: number
 }

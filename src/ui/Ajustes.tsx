@@ -3,142 +3,140 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../data/db';
 
 export const Ajustes: React.FC = () => {
-    // Leemos los ajustes actuales de la base de datos
-    const ajustes = useLiveQuery(() => db.ajustes.toCollection().first());
+    const ajustes = useLiveQuery(async () => {
+        const list = await db.ajustes.toArray();
+        return list[0];
+    });
 
-    const [numTemas, setNumTemas] = useState(25);
+    const [diasParaRojo, setDiasParaRojo] = useState(14);
     const [fechaExamen, setFechaExamen] = useState('');
-    const [diasEstudioSemana, setDiasEstudioSemana] = useState(5);
-    const [frecuenciaCasos, setFrecuenciaCasos] = useState(7);
-    const [horaRecordatorio, setHoraRecordatorio] = useState('09:00');
-    const [guardado, setGuardado] = useState(false);
+    const [horasObjetivo, setHorasObjetivo] = useState(3);
+    const [mensaje, setMensaje] = useState('');
 
-    // Rellenamos el formulario cuando lleguen los datos de Dexie
     useEffect(() => {
         if (ajustes) {
-            const adj = ajustes as any; // Truco maestro para evitar que TS se queje
-            setNumTemas(adj.numTemas || 25);
-
-            if (adj.fechaExamen) {
-                const fechaStr = typeof adj.fechaExamen === 'number'
-                    ? new Date(adj.fechaExamen).toISOString().split('T')[0]
-                    : adj.fechaStr;
-                setFechaExamen(fechaStr || '');
+            setDiasParaRojo(ajustes.diasParaRojo || 14);
+            if (ajustes.fechaExamen) {
+                const f = new Date(ajustes.fechaExamen);
+                setFechaExamen(f.toISOString().split('T')[0]);
             }
-            setDiasEstudioSemana(adj.diasEstudioSemana || adj.diasSemana || 5);
-            setFrecuenciaCasos(adj.frecuenciaCasosPracticos || adj.casosPracticosCadaDias || 7);
-            setHoraRecordatorio(adj.horaRecordatorio || '09:00');
+            setHorasObjetivo((ajustes as any).horasObjetivo || 3);
         }
     }, [ajustes]);
 
-    const handleActualizar = async (e: React.FormEvent) => {
+    const handleGuardar = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!ajustes?.id) return;
 
-        await db.ajustes.update(ajustes.id, {
-            numTemas,
-            fechaExamen: new Date(fechaExamen).getTime(),
-            diasEstudioSemana,
-            frecuenciaCasosPracticos: frecuenciaCasos,
-            horaRecordatorio,
-        } as any); // <--- Con esto le decimos a TypeScript que confíe en nosotros
+        await db.ajustes.put({
+            id: 1,
+            diasParaRojo: Number(diasParaRojo),
+            fechaExamen: fechaExamen ? new Date(fechaExamen).getTime() : new Date().getTime(),
+            horasObjetivo: Number(horasObjetivo)
+        } as any);
 
-        setGuardado(true);
-        setTimeout(() => setGuardado(false), 2500);
+        setMensaje('Configuración actualizada correctamente.');
+        setTimeout(() => setMensaje(''), 3000);
     };
 
-    if (!ajustes) return <div style={{ padding: '16px', color: '#fff' }}>Cargando ajustes...</div>;
+    if (!ajustes) {
+        return <div style={{ padding: '20px', color: '#eaeef0' }}>Cargando ajustes...</div>;
+    }
 
     return (
-        <div style={{ padding: '24px', maxWidth: '500px', margin: '0 auto', color: '#fff', paddingBottom: '80px' }}>
-            <h2 style={{ color: '#4caf50', marginBottom: '8px' }}>⚙️ Ajustes de Estudio</h2>
-            <p style={{ color: '#aaa', marginBottom: '24px' }}>Modifica los parámetros de tu oposición cuando lo necesites.</p>
+        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '90px', color: '#eaeef0' }}>
+            <h2 style={{ margin: 0, fontSize: '1.3rem', color: '#f0b6c5', fontWeight: 600 }}>Configuración de la Oposición</h2>
 
-            <form onSubmit={handleActualizar} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#fff', fontWeight: '500' }}>Número total de temas</label>
+            {mensaje && (
+                <div style={{ padding: '12px', backgroundColor: '#2d5a52', color: '#e0f2ef', borderRadius: '8px', fontSize: '0.85rem' }}>
+                    {mensaje}
+                </div>
+            )}
+
+            <form onSubmit={handleGuardar} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={cardStyle}>
+                    <label style={labelStyle}>Límite de días para aviso de repaso</label>
                     <input
                         type="number"
-                        value={numTemas}
-                        onChange={e => setNumTemas(Number(e.target.value))}
+                        min="1"
+                        max="60"
+                        value={diasParaRojo}
+                        onChange={(e) => setDiasParaRojo(Number(e.target.value))}
                         style={inputStyle}
-                        required
                     />
+                    <span style={hintStyle}>Número de días para que un tema pase a la categoría "Repasado hace tiempo".</span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#fff', fontWeight: '500' }}>Fecha del examen</label>
+                <div style={cardStyle}>
+                    <label style={labelStyle}>Fecha oficial del examen</label>
                     <input
                         type="date"
                         value={fechaExamen}
-                        onChange={e => setFechaExamen(e.target.value)}
+                        onChange={(e) => setFechaExamen(e.target.value)}
                         style={inputStyle}
-                        required
                     />
+                    <span style={hintStyle}>Se utiliza para calcular la cuenta atrás en Estadísticas.</span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#fff', fontWeight: '500' }}>Días de estudio a la semana</label>
+                <div style={cardStyle}>
+                    <label style={labelStyle}>Objetivo diario de estudio (Horas)</label>
                     <input
                         type="number"
-                        min="1" max="7"
-                        value={diasEstudioSemana}
-                        onChange={e => setDiasEstudioSemana(Number(e.target.value))}
+                        min="1"
+                        max="12"
+                        value={horasObjetivo}
+                        onChange={(e) => setHorasObjetivo(Number(e.target.value))}
                         style={inputStyle}
-                        required
                     />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#fff', fontWeight: '500' }}>Casos prácticos cada (días)</label>
-                    <input
-                        type="number"
-                        value={frecuenciaCasos}
-                        onChange={e => setFrecuenciaCasos(Number(e.target.value))}
-                        style={inputStyle}
-                        required
-                    />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <label style={{ color: '#fff', fontWeight: '500' }}>Hora del recordatorio</label>
-                    <input
-                        type="time"
-                        value={horaRecordatorio}
-                        onChange={e => setHoraRecordatorio(e.target.value)}
-                        style={inputStyle}
-                        required
-                    />
+                    <span style={hintStyle}>Meta recomendada para el seguimiento de racha y estadísticas.</span>
                 </div>
 
                 <button
                     type="submit"
                     style={{
-                        marginTop: '16px', padding: '16px', backgroundColor: '#4caf50',
-                        color: 'white', border: 'none', borderRadius: '8px',
-                        fontWeight: 'bold', fontSize: '1.1rem', cursor: 'pointer'
+                        padding: '14px',
+                        backgroundColor: '#f0b6c5',
+                        color: '#111a1e',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        fontSize: '0.95rem',
+                        cursor: 'pointer',
+                        marginTop: '8px'
                     }}
                 >
                     Guardar Cambios
                 </button>
-
-                {guardado && (
-                    <p style={{ textAlign: 'center', color: '#4caf50', fontWeight: 'bold', margin: '0' }}>
-                        ¡Cambios guardados correctamente! ✅
-                    </p>
-                )}
             </form>
         </div>
     );
 };
 
+const cardStyle = {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '8px',
+    backgroundColor: '#1a272c',
+    padding: '16px',
+    borderRadius: '10px',
+    border: '1px solid #2d3e46'
+};
+
+const labelStyle = {
+    fontWeight: 600 as const,
+    fontSize: '0.9rem',
+    color: '#3b9a9c'
+};
+
 const inputStyle = {
-    padding: '12px',
-    borderRadius: '8px',
-    backgroundColor: '#1e1e1e',
-    color: '#fff',
-    border: '1px solid #444',
-    fontSize: '1rem',
-    width: '100%',
-    boxSizing: 'border-box' as const
+    padding: '10px 12px',
+    borderRadius: '6px',
+    backgroundColor: '#111a1e',
+    border: '1px solid #2d3e46',
+    color: '#eaeef0',
+    fontSize: '0.95rem'
+};
+
+const hintStyle = {
+    fontSize: '0.75rem',
+    color: '#8b9da5'
 };

@@ -23,7 +23,8 @@ export const App = () => {
     };
 
     return (
-        <div style={{ backgroundColor: '#121212', minHeight: '100vh', color: '#fff', fontFamily: 'sans-serif' }}>
+        // En el contenedor principal de App.tsx:
+        <div style={{ backgroundColor: '#111A1E', minHeight: '100vh', color: '#EAEFEF', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
             {/* Contenido Principal */}
             <main style={{ paddingBottom: '70px' }}>
                 {tabActual === 'inicio' && (
@@ -82,8 +83,8 @@ const navStyle = {
     left: 0,
     right: 0,
     height: '60px',
-    backgroundColor: '#1e1e1e',
-    borderTop: '1px solid #333',
+    backgroundColor: '#1A272C',
+    borderTop: '1px solid #2D3E46',
     display: 'flex',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -93,7 +94,7 @@ const navStyle = {
 const navBtnStyle = {
     background: 'none',
     border: 'none',
-    color: '#888',
+    color: '#8B9DA5',
     fontSize: '0.85rem',
     fontWeight: 'bold' as const,
     cursor: 'pointer'
@@ -101,5 +102,5 @@ const navBtnStyle = {
 
 const navBtnActiveStyle = {
     ...navBtnStyle,
-    color: '#ff9800'
+    color: '#F0B6C5'
 };

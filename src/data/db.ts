@@ -23,6 +23,7 @@ export interface Ajustes {
     casosPracticosCadaDias: number
     horaRecordatorio: string
     diasParaRojo: number // 90 por defecto
+    minutosPomodoro: number
 }
 
 class AppDB extends Dexie {
