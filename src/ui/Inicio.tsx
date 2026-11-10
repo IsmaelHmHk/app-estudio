@@ -10,36 +10,29 @@ export const Inicio: React.FC<InicioProps> = ({ onAbrirTema }) => {
     const temas = useLiveQuery(() => db.temas.toArray());
     const sesiones = useLiveQuery(() => db.sesiones.toArray());
     const [temaSugerido, setTemaSugerido] = useState<any>(null);
+    const [mostrarNotasExpres, setMostrarNotasExpres] = useState(false);
 
-    // Algoritmo: Selecciona prioritariamente de los que peor llevan el tiempo (o nunca estudiados)
     const obtenerSugerencia = (listaTemas: any[], actualId?: number) => {
         if (!listaTemas || listaTemas.length === 0) return null;
-
-        // Filtramos para evitar repetir exactamente el mismo si le da a "Sugerir otro"
         const candidatos = listaTemas.filter(t => t.id !== actualId);
         const pool = candidatos.length > 0 ? candidatos : listaTemas;
 
-        // Ordenamos por fecha de último estudio (los 'undefined' o más antiguos primero)
         const ordenados = [...pool].sort((a, b) => {
             const tA = a.ultimoEstudio ? new Date(a.ultimoEstudio).getTime() : 0;
             const tB = b.ultimoEstudio ? new Date(b.ultimoEstudio).getTime() : 0;
             return tA - tB;
         });
 
-        // Coge aleatoriamente entre los 4 temas más urgentes para dar variedad
         const urgentes = ordenados.slice(0, Math.min(4, ordenados.length));
-        const elegido = urgentes[Math.floor(Math.random() * urgentes.length)];
-        return elegido;
+        return urgentes[Math.floor(Math.random() * urgentes.length)];
     };
 
-    // Al cargar la pantalla por primera vez
     useEffect(() => {
         if (temas && temas.length > 0 && !temaSugerido) {
             setTemaSugerido(obtenerSugerencia(temas));
         }
     }, [temas]);
 
-    // Calcular racha de días (días consecutivos con al menos 1 sesión)
     const calcularRacha = () => {
         if (!sesiones || sesiones.length === 0) return 0;
         const diasConEstudio = new Set(
@@ -55,7 +48,6 @@ export const Inicio: React.FC<InicioProps> = ({ onAbrirTema }) => {
                 racha++;
                 fechaCheck.setDate(fechaCheck.getDate() - 1);
             } else {
-                // Si hoy aún no ha estudiado, comprobamos si estudió ayer para no romper la racha visualmente
                 if (racha === 0) {
                     fechaCheck.setDate(fechaCheck.getDate() - 1);
                     const ayerStr = fechaCheck.toISOString().split('T')[0];
@@ -71,11 +63,11 @@ export const Inicio: React.FC<InicioProps> = ({ onAbrirTema }) => {
         return racha;
     };
 
-    if (!temas) return <div style={{ padding: '16px', color: '#fff' }}>Cargando inicio...</div>;
+    if (!temas) return <div style={{ padding: '24px', color: '#8B9DA5' }}>Cargando panel...</div>;
 
     const handleSugerirOtro = () => {
-        const nuevo = obtenerSugerencia(temas, temaSugerido?.id);
-        setTemaSugerido(nuevo);
+        setMostrarNotasExpres(false);
+        setTemaSugerido(obtenerSugerencia(temas, temaSugerido?.id));
     };
 
     const handleMarcarCompletado = async () => {
@@ -88,125 +80,177 @@ export const Inicio: React.FC<InicioProps> = ({ onAbrirTema }) => {
             duracionMinutos: 30
         } as any);
 
-        alert(`🎉 ¡Grande! Tema "${temaSugerido.titulo}" completado.`);
+        setMostrarNotasExpres(false);
         setTemaSugerido(obtenerSugerencia(temas, temaSugerido.id));
     };
 
     const racha = calcularRacha();
 
     return (
-        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '80px', color: '#fff' }}>
-            {/* Cabecera con Racha */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '22px', paddingBottom: '90px', color: '#EAEFEF' }}>
+            {/* Header de bienvenida + Badge Racha */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '1.4rem' }}>👋 ¡Hola!</h1>
-                    <p style={{ margin: 0, color: '#aaa', fontSize: '0.85rem' }}>Tu plan automático de hoy</p>
+                    <span style={{ fontSize: '0.75rem', letterSpacing: '1px', textTransform: 'uppercase', color: '#3B9A9C', fontWeight: 700 }}>
+                        Plan Personalizado
+                    </span>
+                    <h1 style={{ margin: '4px 0 0 0', fontSize: '1.5rem', color: '#EAEFEF', fontWeight: 700, letterSpacing: '-0.3px' }}>
+                        Objetivo de Hoy
+                    </h1>
                 </div>
                 <div style={{
-                    backgroundColor: '#1e1e1e',
-                    padding: '8px 12px',
+                    backgroundColor: '#1A272C',
+                    padding: '6px 14px',
                     borderRadius: '20px',
-                    border: '1px solid #ff9800',
+                    border: '1px solid #3B9A9C',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    fontWeight: 'bold',
-                    color: '#ff9800'
+                    fontWeight: 600,
+                    fontSize: '0.8rem',
+                    color: '#3B9A9C',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                 }}>
-                    🔥 {racha} {racha === 1 ? 'día' : 'días'}
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#3B9A9C', display: 'inline-block' }}></span>
+                    Racha: {racha} {racha === 1 ? 'día' : 'días'}
                 </div>
             </div>
 
-            {/* Targeta Principal: Tema Sugerido */}
+            {/* Tarjeta Hero Principal */}
             {temaSugerido ? (
                 <div style={{
-                    backgroundColor: '#1e1e1e',
+                    background: 'linear-gradient(145deg, #1A272C 0%, #141F23 100%)',
                     borderRadius: '16px',
-                    padding: '20px',
-                    border: '2px solid #ff9800',
+                    padding: '22px',
+                    border: '1px solid #2D3E46',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: '16px',
-                    boxShadow: '0 4px 20px rgba(255, 152, 0, 0.15)'
+                    gap: '18px',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)'
                 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#ff9800', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                            🎯 Te toca estudiar
+                        <span style={{
+                            fontSize: '0.7rem',
+                            color: '#F0B6C5',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            backgroundColor: 'rgba(240, 182, 197, 0.1)',
+                            padding: '4px 10px',
+                            borderRadius: '12px',
+                            border: '1px solid rgba(240, 182, 197, 0.2)'
+                        }}>
+                            Prioridad Automática
                         </span>
-                        {temaSugerido.esFavorito && <span>⭐ Favorito</span>}
+                        {temaSugerido.esFavorito && (
+                            <span style={{ fontSize: '0.7rem', color: '#3B9A9C', border: '1px solid #3B9A9C', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>
+                                Favorito
+                            </span>
+                        )}
                     </div>
 
-                    <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#fff' }}>
-                        {temaSugerido.titulo}
-                    </h2>
+                    <div>
+                        <h2 style={{ margin: '0 0 6px 0', fontSize: '1.35rem', color: '#EAEFEF', fontWeight: 600, lineHeight: 1.3 }}>
+                            {temaSugerido.titulo}
+                        </h2>
+                        <p style={{ margin: 0, color: '#8B9DA5', fontSize: '0.82rem' }}>
+                            {temaSugerido.ultimoEstudio
+                                ? `Último repaso realizado el ${new Date(temaSugerido.ultimoEstudio).toLocaleDateString()}`
+                                : 'Sin registros de estudio previo'}
+                        </p>
+                    </div>
 
-                    <p style={{ margin: 0, color: '#aaa', fontSize: '0.85rem' }}>
-                        {temaSugerido.ultimoEstudio
-                            ? `Último repaso: ${new Date(temaSugerido.ultimoEstudio).toLocaleDateString()}`
-                            : '🔴 Aún no lo has estudiado nunca'}
-                    </p>
+                    {mostrarNotasExpres && (
+                        <div style={{
+                            backgroundColor: '#111A1E',
+                            padding: '16px',
+                            borderRadius: '12px',
+                            border: '1px solid #2D3E46',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px'
+                        }}>
+                            <span style={{ fontSize: '0.75rem', color: '#3B9A9C', fontWeight: 700, textTransform: 'uppercase' }}>Notas rápidas:</span>
+                            <p style={{ margin: 0, fontSize: '0.85rem', color: '#C8D3D8', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                                {temaSugerido.notas || 'Sin notas ni esquemas redactados para este tema.'}
+                            </p>
+                        </div>
+                    )}
 
-                    {/* Botones de acción principal */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
                         <button
                             onClick={() => onAbrirTema(temaSugerido.id)}
-                            style={btnPrimaryStyle}
+                            style={{
+                                padding: '14px',
+                                backgroundColor: '#F0B6C5',
+                                color: '#111A1E',
+                                border: 'none',
+                                borderRadius: '10px',
+                                fontWeight: 700,
+                                fontSize: '0.95rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 4px 12px rgba(240, 182, 197, 0.2)'
+                            }}
                         >
-                            ⏱️ Estudiar con Pomodoro y Apuntes
+                            Estudiar con Pomodoro
                         </button>
 
-                        <button
-                            onClick={handleMarcarCompletado}
-                            style={btnSuccessStyle}
-                        >
-                            ✅ Ya lo he estudiado (Marcar rápido)
-                        </button>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                            <button
+                                onClick={() => setMostrarNotasExpres(!mostrarNotasExpres)}
+                                style={{
+                                    padding: '11px',
+                                    backgroundColor: '#233339',
+                                    color: '#EAEFEF',
+                                    border: '1px solid #2D3E46',
+                                    borderRadius: '10px',
+                                    fontWeight: 600,
+                                    fontSize: '0.82rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {mostrarNotasExpres ? 'Ocultar notas' : 'Lectura Exprés'}
+                            </button>
+
+                            <button
+                                onClick={handleMarcarCompletado}
+                                style={{
+                                    padding: '11px',
+                                    backgroundColor: 'rgba(59, 154, 156, 0.15)',
+                                    color: '#3B9A9C',
+                                    border: '1px solid #3B9A9C',
+                                    borderRadius: '10px',
+                                    fontWeight: 600,
+                                    fontSize: '0.82rem',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Marcar visto
+                            </button>
+                        </div>
 
                         <button
                             onClick={handleSugerirOtro}
-                            style={btnSecondaryStyle}
+                            style={{
+                                padding: '10px',
+                                backgroundColor: 'transparent',
+                                color: '#8B9DA5',
+                                border: 'none',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer',
+                                textAlign: 'center'
+                            }}
                         >
-                            🎲 Sugerir otro tema
+                            Proponer otro tema
                         </button>
                     </div>
                 </div>
             ) : (
-                <div style={{ padding: '20px', textAlign: 'center', color: '#aaa' }}>
-                    No hay temas creados aún. Ve a la pestaña Temas para empezar.
+                <div style={{ padding: '30px 20px', textAlign: 'center', color: '#8B9DA5', backgroundColor: '#1A272C', borderRadius: '16px', border: '1px solid #2D3E46' }}>
+                    No hay temas en el temario. Puedes añadirlos en la sección "Temas".
                 </div>
             )}
         </div>
     );
-};
-
-const btnPrimaryStyle = {
-    padding: '14px',
-    backgroundColor: '#ff9800',
-    color: '#000',
-    border: 'none',
-    borderRadius: '10px',
-    fontWeight: 'bold' as const,
-    fontSize: '1rem',
-    cursor: 'pointer'
-};
-
-const btnSuccessStyle = {
-    padding: '12px',
-    backgroundColor: '#2e7d32',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '10px',
-    fontWeight: 'bold' as const,
-    fontSize: '0.9rem',
-    cursor: 'pointer'
-};
-
-const btnSecondaryStyle = {
-    padding: '12px',
-    backgroundColor: '#2a2a2a',
-    color: '#ccc',
-    border: '1px solid #444',
-    borderRadius: '10px',
-    fontSize: '0.85rem',
-    cursor: 'pointer'
 };

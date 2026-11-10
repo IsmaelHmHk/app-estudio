@@ -18,21 +18,13 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
     const [mostrarFormNuevo, setMostrarFormNuevo] = useState(false);
     const [nuevoTitulo, setNuevoTitulo] = useState('');
 
-    if (!temas) {
-        return <div style={{ padding: '16px', color: '#fff' }}>Cargando temas...</div>;
-    }
+    if (!temas) return <div style={{ padding: '24px', color: '#8B9DA5' }}>Cargando temario...</div>;
 
     const maxDias = ajustes?.diasParaRojo || 14;
 
     const getEstadoTema = (t: any) => {
         if (!t.ultimoEstudio) {
-            return {
-                dias: null,
-                porcentaje: 100,
-                color: '#f44336',
-                texto: 'Sin repasar',
-                categoria: 'sin_repasar'
-            };
+            return { dias: null, porcentaje: 100, color: '#8B3246', texto: 'Sin repasar', categoria: 'sin_repasar' };
         }
 
         const fechaUltimo = new Date(t.ultimoEstudio).getTime();
@@ -41,20 +33,14 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
         const porcentaje = Math.min(100, Math.round((dias / maxDias) * 100));
 
         if (dias >= maxDias || porcentaje >= 85) {
-            return {
-                dias,
-                porcentaje,
-                color: '#f44336',
-                texto: `Hace ${dias} d`,
-                categoria: 'hace_tiempo'
-            };
+            return { dias, porcentaje, color: '#8B3246', texto: `Hace ${dias}d`, categoria: 'hace_tiempo' };
         }
 
         return {
             dias,
             porcentaje,
-            color: porcentaje >= 50 ? '#ff9800' : '#4caf50',
-            texto: `Hace ${dias} d`,
+            color: porcentaje >= 50 ? '#D99B26' : '#3B9A9C',
+            texto: `Hace ${dias}d`,
             categoria: 'al_dia'
         };
     };
@@ -64,7 +50,6 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
         const estado = getEstadoTema(t);
 
         if (!coincideTexto) return false;
-
         if (filtro === 'favoritos') return !!t.esFavorito;
         if (filtro === 'sin_repasar') return estado.categoria === 'sin_repasar';
         if (filtro === 'hace_tiempo') return estado.categoria === 'hace_tiempo';
@@ -96,36 +81,39 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
     };
 
     return (
-        <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', paddingBottom: '80px', color: '#fff' }}>
+        <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '18px', paddingBottom: '90px', color: '#EAEFEF' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ margin: 0, fontSize: '1.3rem' }}>Temas ({temasFiltrados.length})</h2>
+                <div>
+                    <h2 style={{ margin: 0, fontSize: '1.35rem', color: '#EAEFEF', fontWeight: 700 }}>Temario ({temasFiltrados.length})</h2>
+                </div>
                 <button
                     onClick={() => setMostrarFormNuevo(!mostrarFormNuevo)}
                     style={{
                         padding: '8px 14px',
-                        backgroundColor: '#ff9800',
-                        color: '#000',
+                        backgroundColor: '#F0B6C5',
+                        color: '#111A1E',
                         border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: 'bold',
+                        borderRadius: '8px',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
                         cursor: 'pointer'
                     }}
                 >
-                    {mostrarFormNuevo ? 'Cancelar' : '+ Nuevo Tema'}
+                    {mostrarFormNuevo ? 'Cancelar' : '+ Añadir Tema'}
                 </button>
             </div>
 
             {mostrarFormNuevo && (
-                <form onSubmit={handleCrearTema} style={{ display: 'flex', gap: '8px', backgroundColor: '#1e1e1e', padding: '12px', borderRadius: '8px', border: '1px solid #333' }}>
+                <form onSubmit={handleCrearTema} style={{ display: 'flex', gap: '8px', backgroundColor: '#1A272C', padding: '14px', borderRadius: '12px', border: '1px solid #2D3E46' }}>
                     <input
                         type="text"
-                        placeholder="Título del tema..."
+                        placeholder="Título o código del tema..."
                         value={nuevoTitulo}
                         onChange={(e) => setNuevoTitulo(e.target.value)}
-                        style={{ flex: 1, padding: '10px', borderRadius: '6px', backgroundColor: '#2a2a2a', border: '1px solid #444', color: '#fff' }}
+                        style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', backgroundColor: '#111A1E', border: '1px solid #2D3E46', color: '#EAEFEF', fontSize: '0.9rem' }}
                         autoFocus
                     />
-                    <button type="submit" style={{ padding: '10px 16px', backgroundColor: '#4caf50', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
+                    <button type="submit" style={{ padding: '10px 16px', backgroundColor: '#3B9A9C', color: '#EAEFEF', border: 'none', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', fontSize: '0.85rem' }}>
                         Guardar
                     </button>
                 </form>
@@ -133,25 +121,26 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
 
             <input
                 type="text"
-                placeholder="Buscar tema..."
+                placeholder="Buscar tema por nombre..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 style={{
-                    padding: '12px',
-                    borderRadius: '8px',
-                    backgroundColor: '#1e1e1e',
-                    border: '1px solid #333',
-                    color: '#fff',
-                    fontSize: '0.95rem'
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    backgroundColor: '#1A272C',
+                    border: '1px solid #2D3E46',
+                    color: '#EAEFEF',
+                    fontSize: '0.9rem',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
                 }}
             />
 
-            {/* Filtros en pestañas limpias */}
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+            {/* Píldoras de Filtro estilo Tab */}
+            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
                 {[
                     { id: 'todos', label: 'Todos' },
                     { id: 'sin_repasar', label: 'Sin repasar' },
-                    { id: 'hace_tiempo', label: 'Repasado hace tiempo' },
+                    { id: 'hace_tiempo', label: 'Atrasados' },
                     { id: 'al_dia', label: 'Al día' },
                     { id: 'favoritos', label: 'Favoritos' }
                 ].map((f) => (
@@ -160,14 +149,15 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
                         onClick={() => setFiltro(f.id as any)}
                         style={{
                             padding: '6px 12px',
-                            borderRadius: '16px',
-                            backgroundColor: filtro === f.id ? '#ff9800' : '#2a2a2a',
-                            color: filtro === f.id ? '#000' : '#ccc',
-                            border: '1px solid #444',
-                            fontWeight: filtro === f.id ? 'bold' : 'normal',
-                            fontSize: '0.8rem',
+                            borderRadius: '20px',
+                            backgroundColor: filtro === f.id ? '#F0B6C5' : '#1A272C',
+                            color: filtro === f.id ? '#111A1E' : '#8B9DA5',
+                            border: filtro === f.id ? '1px solid #F0B6C5' : '1px solid #2D3E46',
+                            fontWeight: filtro === f.id ? 700 : 500,
+                            fontSize: '0.78rem',
                             whiteSpace: 'nowrap',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
                         }}
                     >
                         {f.label}
@@ -175,11 +165,11 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
                 ))}
             </div>
 
-            {/* Lista de Temas */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Lista de Tarjetas */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {temasFiltrados.length === 0 ? (
-                    <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
-                        No hay temas en esta categoría.
+                    <div style={{ padding: '30px 20px', textAlign: 'center', color: '#8B9DA5', backgroundColor: '#1A272C', borderRadius: '12px', border: '1px solid #2D3E46' }}>
+                        No se encontraron temas en esta vista.
                     </div>
                 ) : (
                     temasFiltrados.map((t: any) => {
@@ -190,35 +180,36 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
                                 key={t.id}
                                 onClick={() => onSeleccionarTema(t.id)}
                                 style={{
-                                    backgroundColor: '#1e1e1e',
+                                    backgroundColor: '#1A272C',
                                     padding: '14px 16px',
-                                    borderRadius: '8px',
+                                    borderRadius: '12px',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '10px',
                                     cursor: 'pointer',
-                                    border: '1px solid #333'
+                                    border: '1px solid #2D3E46',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                                 }}
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, paddingRight: '8px' }}>
                                         {t.esFavorito && (
-                                            <span style={{ fontSize: '0.65rem', backgroundColor: '#2a2a2a', color: '#ff9800', border: '1px solid #ff9800', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
-                                                FAVORITO
+                                            <span style={{ fontSize: '0.6rem', color: '#F0B6C5', border: '1px solid #F0B6C5', padding: '1px 5px', borderRadius: '4px', fontWeight: 700 }}>
+                                                FAV
                                             </span>
                                         )}
-                                        <span style={{ fontWeight: 'bold', fontSize: '0.95rem' }}>
+                                        <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#EAEFEF' }}>
                                             {t.titulo}
                                         </span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span
                                             style={{
-                                                fontSize: '0.75rem',
-                                                fontWeight: 'bold',
-                                                padding: '4px 8px',
-                                                borderRadius: '12px',
-                                                backgroundColor: '#2a2a2a',
+                                                fontSize: '0.72rem',
+                                                fontWeight: 700,
+                                                padding: '3px 8px',
+                                                borderRadius: '10px',
+                                                backgroundColor: 'rgba(17, 26, 30, 0.6)',
                                                 color: estado.color,
                                                 border: `1px solid ${estado.color}`
                                             }}
@@ -230,10 +221,10 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
                                             style={{
                                                 background: 'none',
                                                 border: 'none',
-                                                color: '#777',
-                                                fontSize: '0.8rem',
+                                                color: '#8B9DA5',
+                                                fontSize: '0.75rem',
                                                 cursor: 'pointer',
-                                                padding: '4px'
+                                                padding: '2px 4px'
                                             }}
                                         >
                                             Borrar
@@ -241,20 +232,20 @@ export const ListaTemas: React.FC<ListaTemasProps> = ({ onSeleccionarTema }) => 
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    <div style={{ width: '100%', height: '4px', backgroundColor: '#333', borderRadius: '2px', overflow: 'hidden' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    <div style={{ width: '100%', height: '4px', backgroundColor: '#111A1E', borderRadius: '2px', overflow: 'hidden' }}>
                                         <div
                                             style={{
                                                 width: `${estado.porcentaje}%`,
                                                 height: '100%',
                                                 backgroundColor: estado.color,
                                                 borderRadius: '2px',
-                                                transition: 'width 0.4s ease'
+                                                transition: 'width 0.3s ease'
                                             }}
                                         />
                                     </div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#777' }}>
-                                        <span>Último: {t.ultimoEstudio ? new Date(t.ultimoEstudio).toLocaleDateString() : 'Sin registros'}</span>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#8B9DA5' }}>
+                                        <span>Último: {t.ultimoEstudio ? new Date(t.ultimoEstudio).toLocaleDateString() : 'Ninguno'}</span>
                                         <span>Límite: {maxDias} días</span>
                                     </div>
                                 </div>
