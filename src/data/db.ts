@@ -2,6 +2,7 @@ import Dexie, {type Table } from 'dexie';
 
 export interface Tema {
     id?: number;
+    numero?: number; // <--- Añadido
     titulo: string;
     notas?: string;
     ultimoEstudio?: Date;

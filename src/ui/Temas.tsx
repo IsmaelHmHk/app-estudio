@@ -21,7 +21,7 @@ export const Temas: React.FC<TemasProps> = ({ onSelectTema }) => {
             <h2>Lista de Temas ({temas.length})</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
                 {temas.map((tema) => {
-                    const color = progresoColor(tema as any, DIA, ajustes as any);
+                    const color = progresoColor(tema as any, DIA);
 
                     return (
                         <div

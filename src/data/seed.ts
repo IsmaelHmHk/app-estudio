@@ -8,11 +8,14 @@ export async function sembrarDatos() {
 
     const ahora = Date.now()
     await db.temas.bulkAdd(
+        // En src/data/seed.ts, reemplaza la generación de los objetos por:
         Array.from({ length: 25 }, (_, i) => ({
             numero: i + 1,
             titulo: `Tema ${i + 1}`,
             notas: '',
-            ultimoEstudio: i < diasDesdeEstudio.length ? ahora - diasDesdeEstudio[i] * DIA : null,
+            ultimoEstudio: i < diasDesdeEstudio.length
+                ? new Date(ahora - diasDesdeEstudio[i] * DIA)
+                : undefined
         }))
     )
 
