@@ -12,10 +12,39 @@ export const App = () => {
     const [tabActual, setTabActual] = useState<'inicio' | 'temas' | 'stats' | 'ajustes'>('inicio');
     const [temaSeleccionadoId, setTemaSeleccionadoId] = useState<number | null>(null);
 
-    const ajustes = useLiveQuery(() => db.ajustes.get(1));
+    // Consulta segura: obtiene el primer registro de ajustes sin forzar ID fijo
+    const ajustes = useLiveQuery(async () => {
+        try {
+            const list = await db.ajustes.toArray();
+            return list.length > 0 ? list[0] : null;
+        } catch (error) {
+            console.error("Error al acceder a IndexedDB:", error);
+            return null;
+        }
+    });
 
-    if (ajustes === undefined) return <div style={{ color: '#fff', padding: '20px' }}>Cargando...</div>;
-    if (!ajustes) return <Onboarding />;
+    // Mientras IndexedDB responde
+    if (ajustes === undefined) {
+        return (
+            <div style={{
+                backgroundColor: '#111A1E',
+                minHeight: '100vh',
+                color: '#EAEFEF',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: 'system-ui, sans-serif'
+            }}>
+                <div>Cargando OpoPlan...</div>
+            </div>
+        );
+    }
+
+    // Si no existen ajustes todavia, redirige al Onboarding
+    if (!ajustes) {
+        return <Onboarding />;
+    }
 
     const abrirDetalleTema = (id: number) => {
         setTemaSeleccionadoId(id);
@@ -23,7 +52,6 @@ export const App = () => {
     };
 
     return (
-        // En el contenedor principal de App.tsx:
         <div style={{ backgroundColor: '#111A1E', minHeight: '100vh', color: '#EAEFEF', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
             {/* Contenido Principal */}
             <main style={{ paddingBottom: '70px' }}>
@@ -52,25 +80,25 @@ export const App = () => {
                     onClick={() => { setTabActual('inicio'); setTemaSeleccionadoId(null); }}
                     style={tabActual === 'inicio' ? navBtnActiveStyle : navBtnStyle}
                 >
-                    🏠 Inicio
+                    Inicio
                 </button>
                 <button
                     onClick={() => { setTabActual('temas'); setTemaSeleccionadoId(null); }}
                     style={tabActual === 'temas' ? navBtnActiveStyle : navBtnStyle}
                 >
-                    📚 Temas
+                    Temas
                 </button>
                 <button
                     onClick={() => { setTabActual('stats'); setTemaSeleccionadoId(null); }}
                     style={tabActual === 'stats' ? navBtnActiveStyle : navBtnStyle}
                 >
-                    📊 Stats
+                    Stats
                 </button>
                 <button
                     onClick={() => { setTabActual('ajustes'); setTemaSeleccionadoId(null); }}
                     style={tabActual === 'ajustes' ? navBtnActiveStyle : navBtnStyle}
                 >
-                    ⚙️ Ajustes
+                    Ajustes
                 </button>
             </nav>
         </div>
