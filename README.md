@@ -1,75 +1,27 @@
-# React + TypeScript + Vite
+# OpoPlan - Planificador Algorítmico para Oposiciones
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+OpoPlan es una Aplicación Web Progresiva (PWA) desarrollada para optimizar el ciclo de estudio mediante la eliminación de la fatiga de decisión. El sistema automatiza la asignación diaria de temas a través de un algoritmo de priorización que evalúa la frecuencia y antigüedad de los repasos, garantizando una cobertura eficiente y homogénea del temario.
 
-Currently, two official plugins are available:
+## Arquitectura y Funcionalidades Principales
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Motor de Asignación Diaria:** Algoritmo de selección de temario que prioriza elementos con cero iteraciones de estudio y establece un bloqueo de estado (state lock) de 24 horas utilizando el almacenamiento local del cliente.
+- **Módulo de Simulación de Exámenes:** Extracción estocástica de temas acoplada a un temporizador asíncrono para la evaluación bajo condiciones de tiempo límite reales, con persistencia del resultado.
+- **Gestor de Supuestos Prácticos:** Sistema de cronometraje continuo con persistencia de métricas de rendimiento por sesión.
+- **Operatividad Offline First:** Arquitectura tolerante a fallos de red apoyada en Service Workers y persistencia de datos local a través de IndexedDB, garantizando el aislamiento, rendimiento y privacidad absoluta de los datos del usuario.
+- **Dashboard Analítico:** Monitorización en tiempo real de KPIs de estudio, incluyendo rachas de actividad, porcentaje de cobertura del temario, volumen horario acumulado y cálculo asíncrono del tiempo restante (time-to-deadline) para la fecha oficial.
 
-## React Compiler
+## Stack Tecnológico
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend Core:** React 18, TypeScript, Vite
+- **Persistencia de Datos:** Dexie.js (Wrapper de IndexedDB)
+- **Infraestructura PWA:** vite-plugin-pwa (Generación de Service Workers y Manifest)
+- **Integración y Despliegue Continuo (CI/CD):** Vercel (Vinculado a GitHub)
 
-## Expanding the ESLint configuration
+## Despliegue y Ejecución
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+La aplicación está compilada para su distribución nativa web (PWA), operando íntegramente en el lado del cliente (Client-Side Rendering) sin necesidad de backend o bases de datos externas.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
-
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+1. Acceder al endpoint de producción desde un navegador compatible (Chrome/Safari).
+2. Ejecutar la acción "Añadir a la pantalla de inicio" (Install PWA) para que el navegador procese el Web App Manifest.
+3. El Service Worker cacheará los recursos estáticos y la aplicación instanciará su base de datos local (OpoPlanDB), operando de manera 100% independiente al estado de la conexión de red.
 ```
